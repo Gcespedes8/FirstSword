@@ -12,7 +12,8 @@ namespace GC
 
         [HideInInspector]
         public Transform myTransform;
-
+        [HideInInspector]
+        public AnimatorHandler animatorHandler;
 
         public new Rigidbody rigidbody;
         public GameObject normalCamera;
@@ -27,8 +28,11 @@ namespace GC
         {
             rigidbody = GetComponent<Rigidbody>();
             inputHandler = GetComponent<InputHandler>();
+            animatorHandler = GetComponentInChildren<AnimatorHandler>();
             cameraObject = Camera.main.transform;
             myTransform = transform;
+
+            animatorHandler.Initialize();
         }
 
         public void Update()
@@ -46,13 +50,20 @@ namespace GC
 
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
             rigidbody.velocity = projectedVelocity;
-                       
+
+            animatorHandler.UpdateAnimatorValues(inputHandler.moveAmount, 0);
+
+            if (animatorHandler.canRotate)
+            {
+                HandleRotation(delta);
+            }
+
 
         }
-
         #region Movement
         Vector3 normalVector;
-        Vector3 targetPostion;
+        Vector3 targetPosition;
+
         private void HandleRotation(float delta)
         {
             Vector3 targetDir = Vector3.zero;
@@ -73,8 +84,11 @@ namespace GC
             Quaternion targetRotation = Quaternion.Slerp(myTransform.rotation, tr, rs * delta);
 
             myTransform.rotation = targetRotation;
-        }
-        #endregion
-    }
-}
 
+        }
+
+        #endregion
+
+    }
+
+}
